@@ -175,16 +175,41 @@ Use elementwise indexing to display all elements in the vector that are:
 
 - [x] $\leq$ 10
 ```{r}
-vector[vector < 11]
+vector[vector <= 10]
 ```
-- [ ] $>$ 90
+- [x] $>$ 90
 ```{r}
-
+vector[vector > 90]
 ```
-- [ ] $\leq 10$ or $> 90$ 
-- [ ] $> 10$ and $\leq 90$
-- [ ] Odd
-- [ ] (Advanced): Prime
+- [x] $\leq 10$ or $> 90$ 
+```{r}
+vector[vector <= 10 | vector > 90]
+```
+- [x] $> 10$ and $\leq 90$
+```{r}
+vector[vector > 10 & vector <= 90]
+```
+- [x] Odd
+```{r}
+vector[vector %% 2 == 1]
+```
+- [x] (Advanced): Prime
+
+```{r}
+is_prime <- function(x) {
+    if (x < 2) {
+        return(FALSE)
+    }
+    if (x == 2) {
+        return(TRUE)
+    }
+
+    divisors <- 2:floor(sqrt(x))
+    !any(x %% divisors == 0)
+}
+
+vector[sapply(vector, is_prime)]
+```
 
 Hint: You will need to look up how to *combine* logical indexing statements and also some more *advanced* logical indexing statements.
 For the last task look at using `sapply`.
@@ -209,9 +234,24 @@ students <- data.frame(
 )
 ```
 
-- [ ] Using `if_else`, add a new column `result` to `students` that is `"pass"` when the score is at least 40 and `"fail"` otherwise.
-- [ ] Using `case_when`, add a new column `grade` to `students` giving the classification: `"first"` (at least 70), `"2:1"` (at least 60), `"2:2"` (at least 50), `"third"` (at least 40), and `"fail"` otherwise. Remember that conditions are checked in order, so the most specific should come first.
-- [ ] Standard `if`/`else` statements make a single decision about a single value. Using `if`, `else if` and `else`, complete the stub function `is_leap_year` below so that it returns `TRUE` if `year` is a *leap year* and `FALSE` otherwise. The rule is:
+- [x] Using `if_else`, add a new column `result` to `students` that is `"pass"` when the score is at least 40 and `"fail"` otherwise.
+```{r}
+if_else(students$score >= 40, "pass", "fail")
+```
+- [x] Using `case_when`, add a new column `grade` to `students` giving the classification: `"first"` (at least 70), `"2:1"` (at least 60), `"2:2"` (at least 50), `"third"` (at least 40), and `"fail"` otherwise. Remember that conditions are checked in order, so the most specific should come first.
+```{r}
+grades <- case_when(
+    students$score >= 70 ~ "first",
+    students$score >= 60 ~ "2:1",
+    students$score >= 50 ~ "2:2",
+    students$score >= 40 ~ "third",
+    TRUE ~ "fail"
+)
+
+students["grade"] <- grades
+students
+```
+- [x] Standard `if`/`else` statements make a single decision about a single value. Using `if`, `else if` and `else`, complete the stub function `is_leap_year` below so that it returns `TRUE` if `year` is a *leap year* and `FALSE` otherwise. The rule is:
     - if `year` is divisible by 400, it is a leap year;
     - otherwise, if `year` is divisible by 100, it is *not* a leap year;
     - otherwise, if `year` is divisible by 4, it is a leap year;
@@ -230,7 +270,11 @@ The modulo operator `%%` gives the remainder of a division, so `year %% 400 == 0
 ```{r}
 #| error: TRUE
 is_leap_year <- function(year) {
-    FALSE # Replace with correct code.
+    if (year %% 400 == 0) return(TRUE)
+    if (year %% 100 == 0) return(FALSE)
+    if (year %% 4 == 0) return(TRUE)
+
+    FALSE
 }
 
 # Self-check: should run without error once is_leap_year is correct
@@ -244,7 +288,7 @@ stopifnot(
 
 ### Part (b): Loops
 
-- [ ] In the next block, write a function that uses a for loop to print a message if an input vector contains NA values. Test it on the five variables supplied below.
+- [x] In the next block, write a function that uses a for loop to print a message if an input vector contains NA values. Test it on the five variables supplied below.
 
 ```{r}
 vec1 <- 1:10
@@ -252,9 +296,24 @@ vec2 <- c(1,2,NA,4)
 vec3 <- c()
 vec4 <- "This is not a vector"
 vec5 <- matrix(c(1,2,3,4,NA,6), nrow=2, ncol=3)
+
+find_na <- function(obj) {
+    for (i in obj) {
+        if (is.na(i)) {
+            print("NA found")
+        }
+    }
+}
+
+find_na(vec1)
+find_na(vec2)
+find_na(vec3)
+find_na(vec4)
+find_na(vec5)
+
 ```
 
-- [ ] In a new chunk, write a function called `make_square` that, given an integer, will print a square of full stops with side length that integer. Here are some examples:
+- [x] In a new chunk, write a function called `make_square` that, given an integer, will print a square of full stops with side length that integer. Here are some examples:
 
 ```r
 make_square(3)
@@ -274,12 +333,66 @@ make_square(5)
 .....
 ```
 
-- [ ] (Advanced): Look up *while loops* in `R`. Write a function that uses a while loop to simulate a particle undergoing a *random walk* in 1D. Starting from 0, in each iteration, the particle either takes a step $x \mapsto x + 1$ or $x \mapsto x - 1$, uniformly at random. Terminate the walk when the particle reaches either -10 or +10, and print where it ended up and how many steps it took.
-- [ ] (Advanced): Run your function from above multiple times. Display how often the particle ended at -10 and how often it ended at +10. Make sure that your results do not change if the worksheet is run multiple times!
+```{r}
+make_square <- function(n) {
+  n <- as.integer(n)
+
+  if (n == 1) {
+    print(".")
+    return(invisible(NULL))
+  }
+
+  outside <- paste(rep(".", n), collapse = "")
+  inside <- paste0(".", paste(rep(" ", n - 2), collapse = ""), ".")
+
+  square <- c(outside, rep(inside, n - 2), outside)
+
+  cat(paste(square, collapse = "\n"), "\n", sep = "")
+}
+
+make_square(3)
+make_square(5)
+```
+- [x] (Advanced): Look up *while loops* in `R`. Write a function that uses a while loop to simulate a particle undergoing a *random walk* in 1D. Starting from 0, in each iteration, the particle either takes a step $x \mapsto x + 1$ or $x \mapsto x - 1$, uniformly at random. Terminate the walk when the particle reaches either -10 or +10, and print where it ended up and how many steps it took.
+```{r}
+random_walk <- function(print_result = TRUE) {
+  position <- 0
+  steps <- 0
+
+  while (position != -10 && position != 10) {
+    position <- position + sample(c(-1, 1), size = 1)
+    steps <- steps + 1
+  }
+
+  if (print_result) {
+    cat("Ended at", position, "after", steps, "steps.\n")
+  }
+
+  invisible(c(position = position, steps = steps))
+}
+
+random_walk()
+```
+- [x] (Advanced): Run your function from above multiple times. Display how often the particle ended at -10 and how often it ended at +10. Make sure that your results do not change if the worksheet is run multiple times!
 
 ::: {.callout-tip}
 Your random walk uses randomly generated numbers, so it will produce different output every time the document is rendered. To make results *reproducible* — the same every time — look up `set.seed()` and call it once at the start of the chunk. We will return to why this matters for reproducibility later in the course.
 :::
+```{r}
+set.seed(12345)
+
+number_of_walks <- 1000
+
+results <- replicate(
+  number_of_walks,
+  random_walk(print_result = FALSE)
+)
+
+end_positions <- results["position", ]
+
+cat("Ended at -10:", sum(end_positions == -10), "times\n")
+cat("Ended at +10:", sum(end_positions == 10), "times\n")
+```
 
 ## Part 4: Pipes
 
