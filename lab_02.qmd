@@ -403,6 +403,8 @@ The *pipe* operator `|>` passes the value on its left into the first argument of
 ```{r}
 x <- c(4, 9, 16, 25)
 round(mean(sqrt(x)), 1)
+
+sqrt(x) |> mean() |> round(1)
 ```
 
 ## Part 5: Debugging
@@ -413,24 +415,30 @@ Then, feed the problem into an LLM and see whether it comes up with the same sol
 
 ### Tasks
 
-- [ ] Modify the below code to return the row sums of only the non-NA values.
+- [x] Modify the below code to return the row sums of only the non-NA values.
 
 ```{r}
-# A data frame with some missing values
-df <- data.frame(a = c(1, 2, 3, NA, 5), b = c(10, NA, 30, 40, 50))
+df <- data.frame(
+  a = c(1, 2, 3, NA, 5),
+  b = c(10, NA, 30, 40, 50)
+)
 
-# Compute row-wise sums
-row_sums <- apply(df, 1, sum)
+row_sums <- apply(df, 1, sum, na.rm = TRUE)
 
 print(row_sums)
 ```
 
-- [ ] Given two vectors `x` and `y` of the same length, the below code prints out the (Euclidean) distance between `x` and `y`, but for some reason it is printing a distance between vectors that are not of the same length. Correct the code.
+- [x] Given two vectors `x` and `y` of the same length, the below code prints out the (Euclidean) distance between `x` and `y`, but for some reason it is printing a distance between vectors that are not of the same length. Correct the code.
 
 ```{r}
 distance <- function(x, y) {
-    return(norm(x - y, type="2"))
+  if (length(x) != length(y)) {
+    return(warning("x and y must have the same length"))
+  }
+
+  sqrt(sum((x - y)^2))
 }
+
 a <- c(1, 2, 3, 4)
 b <- c(5, 6)
 
@@ -438,7 +446,7 @@ result <- distance(a, b)
 print(result)
 ```
 
-- [ ] The below code prints out "values are equal" if `a` and `b` are equal, but for some reason it is not working for these example values. Correct the code.
+- [x] The below code prints out "values are equal" if `a` and `b` are equal, but for some reason it is not working for these example values. Correct the code.
 ```{r}
 a <- 0.1 + 0.2
 b <- 0.3
@@ -452,11 +460,13 @@ if(a == b) {
 
 Hint: see the [Assignments and Types](https://soton-fds.github.io/week02.html#assignments-and-types) section of the notes.
 
-- [ ] The below returns the entries of `vec1` for which `vec2 == "y"`. So why does `subset` contain an `NA`? Fix the code.
+- [x] The below returns the entries of `vec1` for which `vec2 == "y"`. So why does `subset` contain an `NA`? Fix the code.
 
 ```{r}
 vec1 <- 1:5
 vec2 <- c("x", "y", NA, "x", "y")
-subset <- vec1[vec2 == "y"]
+
+subset <- vec1[vec2 %in% "y"]
+
 subset
 ```
